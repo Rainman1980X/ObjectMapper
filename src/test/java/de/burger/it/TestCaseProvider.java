@@ -24,7 +24,7 @@ public class TestCaseProvider {
                             setFifthStep(100L);
                             setName("Matthias");
                         }},
-                        new HashMap<String, Object>() {{
+                        new HashMap<>() {{
                             put("firstStep", 1);
                             put("secondStep", 2);
                             put("thirdStep", true);
@@ -38,7 +38,7 @@ public class TestCaseProvider {
                 // DataModel – Standardwerte
                 new TestCase<>(
                         new DataModel(),
-                        new HashMap<String, Object>() {{
+                        new HashMap<>() {{
                             put("firstStep", 0);
                             put("secondStep", 0);
                             put("thirdStep", false);
@@ -59,7 +59,7 @@ public class TestCaseProvider {
                             setFifthStep(100L);
                             setName("Matthias");
                         }},
-                        new HashMap<String, Object>() {{
+                        new HashMap<>() {{
                             put("firstStep", 1);
                             put("secondStep", 2);
                             put("thirdStep", true);
@@ -73,7 +73,7 @@ public class TestCaseProvider {
                 // DataModelObjDataTypes – null
                 new TestCase<>(
                         new DataModelObjDataTypes(),
-                        new HashMap<String, Object>() {{
+                        new HashMap<>() {{
                             put("firstStep", null);
                             put("secondStep", null);
                             put("thirdStep", null);

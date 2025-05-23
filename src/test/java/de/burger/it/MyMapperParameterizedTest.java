@@ -1,4 +1,5 @@
 package de.burger.it;
+import de.burger.it.transformer.DataModelToObjTransformer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -14,7 +15,8 @@ public class MyMapperParameterizedTest {
     @ParameterizedTest
     @MethodSource("de.burger.it.TestCaseProvider#provideTestCases")
     <T> void testMappingRoundtrip(TestCaseProvider.TestCase<T> testCase) {
-        ValueModel model = mapper.forType(testCase.modelClass()).mapToValueModel(testCase.original());
+        ValueModel model = mapper.forSingleType(testCase.modelClass())
+                .mapToValueModel(testCase.original());
         Map<String, ValueG<?>> values = model.getValues();
 
         assertEquals(testCase.expectedValues().size(), values.size());
@@ -28,7 +30,9 @@ public class MyMapperParameterizedTest {
             }
         });
 
-        T reconstructed = mapper.forType(testCase.modelClass()).mapFrom(model);
+        T reconstructed = mapper.forType(testCase.modelClass())
+                .asSingleType()
+                .mapFrom(model);
         assertEquals(testCase.original(), reconstructed);
     }
 
@@ -38,14 +42,47 @@ public class MyMapperParameterizedTest {
         original.setFirstStep(123);
         original.setThirdStep(true);
 
-        ValueModel model = mapper.forType(DataModel.class).mapToValueModel(original);
-        DataModelObjDataTypes objects = mapper.forType(DataModelObjDataTypes.class).mapFrom(model);
-        ValueModel model2 = mapper.forType(DataModelObjDataTypes.class).mapToValueModel(objects);
-        DataModel roundtrip = mapper.forType(DataModel.class).mapFrom(model2);
+        ValueModel model = mapper.forType(DataModel.class).asSingleType().mapToValueModel(original);
+        DataModelObjDataTypes objects = mapper
+                .forType(DataModelObjDataTypes.class)
+                .asSingleType()
+                .mapFrom(model);
+        ValueModel model2 = mapper
+                .forType(DataModelObjDataTypes.class)
+                .asSingleType()
+                .mapToValueModel(objects);
 
+        DataModel roundtrip = mapper
+                .forType(DataModel.class)
+                .asSingleType()
+                .mapFrom(model2);
         assertEquals(original.getFirstStep(), roundtrip.getFirstStep());
         assertEquals(original.isThirdStep(), roundtrip.isThirdStep());
     }
+
+    @Test
+    void testPrimitivesToObjectsToPrimitivesWithTransformer() {
+        MyMapper mapper = new MyMapper();
+
+        // ➤ Ursprüngliches Primitive-Modell vorbereiten
+        DataModel original = new DataModel();
+        original.setFirstStep(123);
+        original.setThirdStep(true);
+
+        // ➤ Schritt 1: Primitives → ValueModel
+        DataModelObjDataTypes dataModelObjDataTypes = mapper
+                .forType(DataModel.class)
+                .forType(DataModelObjDataTypes.class)
+                .withTransformer(DataModelToObjTransformer::apply)
+                .mapFrom(original); // ✅ original ist ein DataModel
+
+
+        // ➤ Verifikation
+        assertEquals(original.getFirstStep(), dataModelObjDataTypes.getFirstStep());
+        assertEquals(original.isThirdStep(), dataModelObjDataTypes.getThirdStep());
+    }
+
+
 }
 
 
